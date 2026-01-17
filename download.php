@@ -1,27 +1,34 @@
 <?php
-// ===== MODE DOWNLOAD (STREAMING) =====
-if (isset($_GET['download'])) {
-  if (!isset($_GET['url'])) exit('No URL');
+if(!isset($_GET['url']) || !isset($_GET['type'])){
+  die("Invalid request");
+}
 
-  $url  = $_GET['url'];
-  $name = $_GET['name'] ?? 'tiktok';
+$url = urlencode($_GET['url']);
+$type = $_GET['type'];
 
+$api = "https://www.tikwm.com/api/?url=".$url;
+
+$json = file_get_contents($api);
+$data = json_decode($json,true);
+
+if(!$data || $data['code'] != 0){
+  die("Gagal mengambil data TikTok");
+}
+
+$video = $data['data']['play'];
+$audio = $data['data']['music'];
+$title = preg_replace('/[^a-zA-Z0-9]/','_', $data['data']['title']);
+
+if($type == "video"){
   header("Content-Type: application/octet-stream");
-  header("Content-Disposition: attachment; filename=\"$name\"");
-  header("Pragma: no-cache");
-  header("Expires: 0");
-
-  $ch = curl_init($url);
-  curl_setopt_array($ch, [
-    CURLOPT_FOLLOWLOCATION => true,
-    CURLOPT_USERAGENT => 'Mozilla/5.0',
-    CURLOPT_RETURNTRANSFER => false, // PENTING
-    CURLOPT_HEADER => false,
-    CURLOPT_BUFFERSIZE => 8192,
-  ]);
-
-  curl_exec($ch);
-  curl_close($ch);
+  header("Content-Disposition: attachment; filename=\"tiktok_$title.mp4\"");
+  readfile($video);
   exit;
 }
-?>
+
+if($type == "audio"){
+  header("Content-Type: application/octet-stream");
+  header("Content-Disposition: attachment; filename=\"tiktok_$title.mp3\"");
+  readfile($audio);
+  exit;
+}
