@@ -1,22 +1,32 @@
 <?php
-// download.php
 if (!isset($_GET['url'])) {
   http_response_code(400);
   exit('No URL');
 }
 
 $url  = $_GET['url'];
-$name = $_GET['name'] ?? 'tiktok-file';
+$name = $_GET['name'] ?? 'tiktok';
 
-// ambil ekstensi
-$ext = pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION);
-if (!$ext) $ext = 'mp4';
+$ch = curl_init($url);
+curl_setopt_array($ch, [
+  CURLOPT_RETURNTRANSFER => true,
+  CURLOPT_FOLLOWLOCATION => true,
+  CURLOPT_USERAGENT => 'Mozilla/5.0',
+]);
+$data = curl_exec($ch);
+$mime = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+curl_close($ch);
+
+if (!$data) {
+  http_response_code(500);
+  exit('Failed download');
+}
+
+$ext = str_contains($mime, 'audio') ? 'mp3' : 'mp4';
 
 header("Content-Type: application/octet-stream");
 header("Content-Disposition: attachment; filename=\"$name.$ext\"");
-header("Content-Transfer-Encoding: binary");
-header("Pragma: no-cache");
-header("Expires: 0");
+header("Content-Length: " . strlen($data));
 
-readfile($url);
+echo $data;
 exit;
