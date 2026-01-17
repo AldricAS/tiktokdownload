@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TikTok Downloader</title>
+
+<style>
+*{box-sizing:border-box;font-family:system-ui}
+body{
+  margin:0;
+  background:radial-gradient(circle at top,#121212,#050505);
+  color:#fff;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  padding:20px;
+}
+.box{
+  width:100%;
+  max-width:420px;
+  background:#0b0f14;
+  border-radius:18px;
+  padding:20px;
+}
+input,button{
+  width:100%;
+  padding:12px;
+  border-radius:12px;
+  border:none;
+  margin-top:10px;
+}
+input{background:#111827;color:#fff}
+button{font-weight:600;cursor:pointer}
+.fetch{background:#3b82f6;color:#000}
+.actions{display:flex;gap:10px;margin-top:10px}
+.video{background:#22c55e;color:#000}
+.audio{background:#facc15;color:#000}
+video{width:100%;border-radius:14px;margin-top:10px}
+footer{text-align:center;font-size:12px;color:#9ca3af;margin-top:15px}
+</style>
+</head>
+
+<body>
+<div class="box">
+  <h2 align="center">TikTok Downloader</h2>
+
+  <input id="url" placeholder="Paste link TikTok">
+  <button class="fetch" onclick="getData()">Ambil Video</button>
+
+  <video id="preview" controls style="display:none"></video>
+
+  <div class="actions" id="actions" style="display:none">
+    <button class="video" onclick="downloadVideo()">⬇ Video</button>
+    <button class="audio" onclick="downloadAudio()">🎧 Audio</button>
+  </div>
+
+  <footer>© Copyright by Aldric</footer>
+</div>
+
+<script>
+let videoUrl='', audioUrl='', title='tiktok';
+
+async function getData(){
+  const url=document.getElementById('url').value.trim();
+  if(!url) return alert('Masukin link dulu');
+
+  const res = await fetch(
+    'https://www.tikwm.com/api/?url=' + encodeURIComponent(url)
+  );
+  const json = await res.json();
+  const d = json.data;
+
+  videoUrl = d.play;
+  audioUrl = d.music;
+  title = d.author.nickname || 'tiktok';
+
+  const v = document.getElementById('preview');
+  v.src = d.play;
+  v.style.display='block';
+
+  document.getElementById('actions').style.display='flex';
+}
+
+function downloadVideo(){
+  window.location.href =
+    'download.php?url=' + encodeURIComponent(videoUrl) +
+    '&name=' + encodeURIComponent(title + '-video');
+}
+
+function downloadAudio(){
+  window.location.href =
+    'download.php?url=' + encodeURIComponent(audioUrl) +
+    '&name=' + encodeURIComponent(title + '-audio');
+}
+</script>
+</body>
+</html>
+
