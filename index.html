@@ -2,98 +2,107 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>TikTok Downloader</title>
 
 <style>
-*{box-sizing:border-box;font-family:system-ui}
 body{
   margin:0;
-  background:radial-gradient(circle at top,#121212,#050505);
+  font-family:system-ui,Arial;
+  background:#0b0f14;
   color:#fff;
-  min-height:100vh;
   display:flex;
   justify-content:center;
-  padding:20px;
+  align-items:center;
+  min-height:100vh;
 }
 .box{
   width:100%;
   max-width:420px;
-  background:#0b0f14;
-  border-radius:18px;
+  background:#121722;
   padding:20px;
+  border-radius:14px;
 }
-input,button{
+h1{
+  text-align:center;
+  margin-bottom:15px;
+}
+input{
   width:100%;
   padding:12px;
-  border-radius:12px;
+  border-radius:10px;
   border:none;
-  margin-top:10px;
+  outline:none;
+  margin-bottom:10px;
 }
-input{background:#111827;color:#fff}
-button{font-weight:600;cursor:pointer}
-.fetch{background:#3b82f6;color:#000}
-.actions{display:flex;gap:10px;margin-top:10px}
-.video{background:#22c55e;color:#000}
-.audio{background:#facc15;color:#000}
-video{width:100%;border-radius:14px;margin-top:10px}
-footer{text-align:center;font-size:12px;color:#9ca3af;margin-top:15px}
+button{
+  width:100%;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+}
+.video{background:#22c55e;margin-bottom:8px}
+.audio{background:#3b82f6}
+.progress{
+  margin-top:15px;
+  height:8px;
+  background:#1f2937;
+  border-radius:20px;
+  overflow:hidden;
+  display:none;
+}
+.bar{
+  width:0%;
+  height:100%;
+  background:linear-gradient(90deg,#22c55e,#3b82f6);
+  transition:width .3s;
+}
+footer{
+  text-align:center;
+  font-size:12px;
+  opacity:.6;
+  margin-top:15px;
+}
 </style>
 </head>
 
 <body>
 <div class="box">
-  <h2 align="center">TikTok Downloader</h2>
+<h1>🎵 TikTok Downloader</h1>
 
-  <input id="url" placeholder="Paste link TikTok">
-  <button class="fetch" onclick="getData()">Ambil Video</button>
+<input id="url" placeholder="Tempel link TikTok">
 
-  <video id="preview" controls style="display:none"></video>
+<button class="video" onclick="download('video')">Download Video</button>
+<button class="audio" onclick="download('audio')">Download Audio</button>
 
-  <div class="actions" id="actions" style="display:none">
-    <button class="video" onclick="downloadVideo()">⬇ Video</button>
-    <button class="audio" onclick="downloadAudio()">🎧 Audio</button>
-  </div>
+<div class="progress" id="progress">
+  <div class="bar" id="bar"></div>
+</div>
 
-  <footer>© Copyright by Aldric</footer>
+<footer>© Copyright by Aldric</footer>
 </div>
 
 <script>
-let videoUrl='', audioUrl='', title='tiktok';
+function download(type){
+  const url = document.getElementById('url').value;
+  if(!url) return alert("Masukkan link TikTok!");
 
-async function getData(){
-  const url=document.getElementById('url').value.trim();
-  if(!url) return alert('Masukin link dulu');
+  document.getElementById('progress').style.display='block';
+  let bar=document.getElementById('bar');
+  bar.style.width='0%';
 
-  const res = await fetch(
-    'https://www.tikwm.com/api/?url=' + encodeURIComponent(url)
-  );
-  const json = await res.json();
-  const d = json.data;
+  let p=0;
+  let fake=setInterval(()=>{
+    p+=10;
+    bar.style.width=p+'%';
+    if(p>=90) clearInterval(fake);
+  },200);
 
-  videoUrl = d.play;
-  audioUrl = d.music;
-  title = d.author.nickname || 'tiktok';
-
-  const v = document.getElementById('preview');
-  v.src = d.play;
-  v.style.display='block';
-
-  document.getElementById('actions').style.display='flex';
-}
-
-function downloadVideo(){
   window.location.href =
-    'download.php?url=' + encodeURIComponent(videoUrl) +
-    '&name=' + encodeURIComponent(title + '-video');
-}
-
-function downloadAudio(){
-  window.location.href =
-    'download.php?url=' + encodeURIComponent(audioUrl) +
-    '&name=' + encodeURIComponent(title + '-audio');
+    `download.php?type=${type}&url=`+encodeURIComponent(url);
 }
 </script>
 </body>
 </html>
-
